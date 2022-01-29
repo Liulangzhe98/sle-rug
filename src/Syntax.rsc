@@ -13,38 +13,46 @@ start syntax Form
 syntax Question
   = Str Id ":" Type // Simple question
   | Str Id ":" Type "=" Expr // computed question
-  | @Foldable "if" "(" IF_Statement ")" "{" Question* "}"  // if-then 
-  | @Foldable "else" "{" Question* "}" // else clause                     TODO: THIS BREAKS STUFF
+  | "{" Question* "}" // block of questions
+  | @Foldable "if" "(" Expr ")" "{" Question* "}"  // if-then 
+  | @Foldable "if" "(" Expr ")" "{" Question* "}" "else" "{" Question* "}" // if-then-else clause  
   ; 
   
-syntax IF_Statement
-	= Id
-	| Id "\>" Int ;  // TODO: implement correct if statement checking
-
-// TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
-// Think about disambiguation using priorities and associativity
-// and use C/Java style precedence rules (look it up on the internet)
+/*  
+Java precedence: 
+	All levels are LEFT to RIGHT unless written otherwise
+	Level 16 : brackets
+	Level 14 : unary minus (-6), !  (RIGHT to LEFT)
+	Level 12 : *, / 
+	Level 11 : +, -
+	Level  9 : <=, >=, >, <
+	Level  8 : ==, !=
+	Level  4 : &&
+	Level  3 : ||
+*/
 syntax Expr 
   	= Id \ "true" \ "false" // true/false are reserved keywords.
+  	| Str | Bool | Int
   	| bracket "(" Expr ")"
-  	| left Expr "*" Expr
-	| left Expr "+" Expr
-	| left Expr "-" Expr
-	| Int
+  	> right ("-" | "!") Expr
+  	> left Expr ("*" | "/") Expr
+	> left Expr ("+" | "-") Expr
+	> left Expr ("\<=" | "\>=" | "\<" | "\>") Expr
+	> left Expr ("==" | "!=") Expr
+	> left Expr "&&" Expr
+	> left Expr "||" Expr
   ;
   
 syntax Type
   = "boolean"
-  | "integer";  
+  | "integer"
+  | "string" ;  
   
 lexical Str 
 	=  "\"" [a-zA-Z][a-zA-Z0-9_\ ?:]* "\"" ;
 
 lexical Int 
-  = [0-9]+
-  | "("[0-9]+")";
+  = [0-9]+;
 
-lexical Bool = ;
-
-
-
+lexical Bool 
+	= "false" | "true";
