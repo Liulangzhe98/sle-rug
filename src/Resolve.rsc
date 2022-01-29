@@ -26,9 +26,16 @@ RefGraph resolve(AForm f) = <us, ds, us o ds>
   when Use us := uses(f), Def ds := defs(f);
 
 Use uses(AForm f) {
-  return {}; 
+	Use ref_uses = {};
+  for(/AExpr expr := f) {
+    ref_uses += {<ref.src, ref.name> | /AId ref := expr};
+  }
+  return ref_uses;
+	
 }
 
 Def defs(AForm f) {
-  return {}; 
+  return 
+  	{ <ref.name, ref.src> | /simp_quest(str _, AId ref, AType _) := f} + 
+  	{ <ref.name, ref.src> | /computed_quest(str _, AId ref, AType _, AExpr _) := f};
 }

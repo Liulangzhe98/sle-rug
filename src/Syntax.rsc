@@ -13,7 +13,7 @@ start syntax Form
 syntax Question
   = Str Id ":" Type // Simple question
   | Str Id ":" Type "=" Expr // computed question
-  | "{" Question* "}" // block of questions
+  | @Foldable "{" Question* "}" // block of questions
   | @Foldable "if" "(" Expr ")" "{" Question* "}"  // if-then 
   | @Foldable "if" "(" Expr ")" "{" Question* "}" "else" "{" Question* "}" // if-then-else clause  
   ; 
@@ -32,7 +32,7 @@ Java precedence:
 */
 syntax Expr 
   	= Id \ "true" \ "false" // true/false are reserved keywords.
-  	| Str | Bool | Int
+  	| Bool | Int | Str
   	| bracket "(" Expr ")"
   	> right ("-" | "!") Expr
   	> left Expr ("*" | "/") Expr
