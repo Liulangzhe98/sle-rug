@@ -8,29 +8,51 @@ extend lang::std::Id;
  */
 
 start syntax Form 
-  = "form" Id "{" Question* "}"; 
+  = @Foldable "form" Id "{" Question* "}";
 
-// TODO: question, computed question, block, if-then-else, if-then
 syntax Question
-  = 
+  = Str Id ":" Type // Simple question
+  | Str Id ":" Type "=" Expr // computed question
+  | @Foldable "{" Question* "}" // block of questions
+  | @Foldable "if" "(" Expr ")" "{" Question* "}"  // if-then 
+  | @Foldable "if" "(" Expr ")" "{" Question* "}" "else" "{" Question* "}" // if-then-else clause  
   ; 
-
-// TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
-// Think about disambiguation using priorities and associativity
-// and use C/Java style precedence rules (look it up on the internet)
+  
+/*  
+Java precedence: 
+	All levels are LEFT to RIGHT unless written otherwise
+	Level 16 : brackets
+	Level 14 : unary minus (-6), !  (RIGHT to LEFT)
+	Level 12 : *, / 
+	Level 11 : +, -
+	Level  9 : <=, >=, >, <
+	Level  8 : ==, !=
+	Level  4 : &&
+	Level  3 : ||
+*/
 syntax Expr 
-  = Id \ "true" \ "false" // true/false are reserved keywords.
+  	= Id \ "true" \ "false" // true/false are reserved keywords.
+  	| Bool | Int | Str
+  	| bracket "(" Expr ")"
+  	> right ("-" | "!") Expr
+  	> left Expr ("*" | "/") Expr
+	> left Expr ("+" | "-") Expr
+	> left Expr ("\<=" | "\>=" | "\<" | "\>") Expr
+	> left Expr ("==" | "!=") Expr
+	> left Expr "&&" Expr
+	> left Expr "||" Expr
   ;
   
 syntax Type
-  = ;  
+  = "boolean"
+  | "integer"
+  | "string" ;  
   
-lexical Str = ;
+lexical Str 
+	=  "\"" [a-zA-Z][a-zA-Z0-9_\ ?:]* "\"" ;
 
 lexical Int 
-  = ;
+  = [0-9]+;
 
-lexical Bool = ;
-
-
-
+lexical Bool 
+	= "false" | "true";
