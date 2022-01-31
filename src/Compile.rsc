@@ -256,7 +256,7 @@ str expr2str(AExpr arg) {
 		case ref(AId id):
 			return "<id.name>.value";
 		case boolean(bool b):
-			return b.toString();
+			return "<b>";
 		case integer(int x):
 			return "<x>.value";		
 		case string(str s):
