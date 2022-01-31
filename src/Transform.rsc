@@ -29,7 +29,39 @@ import AST;
  */
  
 AForm flatten(AForm f) {
+  f.questions = flatten(f.questions, boolean(true));
   return f; 
+}
+
+list[AQuestion] flatten(list[AQuestion] qs, AExpr e)  {
+  list[AQuestion] fqs = [];
+  for(q <- qs) {
+    fqs += flatten(q, e);
+   }
+  return fqs;
+}
+
+list[AQuestion] flatten(AQuestion q, AExpr e)  {
+  list[AQuestion] qs = [];
+  switch(q)  {
+    case simp_quest(str _, AId _, AType _):	
+      qs += [guarded_question(e, [q])];
+    case computed_quest(str _, AId _, AType _, AExpr _):
+      qs += [guarded_question(e, [q])];
+    case block_quest(list[AQuestion] questions):
+      for(question <- questions) {
+        qs += flatten(question, e);
+      }
+    case guarded_question(AExpr expr, list[AQuestion] questions):
+      for(question <- questions) {
+        qs += flatten(question, and(e, expr));
+      }
+    case guarded_else(AExpr expr, list[AQuestion] questions, list[AQuestion] else_quest):
+      for(question <- questions) {
+        qs += flatten(question, and(e, expr)) + flatten(else_quest, and(not(e), expr));
+      }
+    }
+  return qs;
 }
 
 /* Rename refactoring:

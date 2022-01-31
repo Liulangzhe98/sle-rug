@@ -31,11 +31,11 @@ Java precedence:
 	Level  3 : ||
 */
 syntax Expr 
-  	= Id \ "true" \ "false" // true/false are reserved keywords.
-  	| Bool | Int | Str
-  	| bracket "(" Expr ")"
-  	> right ("-" | "!") Expr
-  	> left Expr ("*" | "/") Expr
+  = Id \ "true" \ "false" // true/false are reserved keywords.
+  | Bool | Int | Str
+  | bracket "(" Expr ")"
+  > right ("-" | "!") Expr
+  > left Expr ("*" | "/") Expr
 	> left Expr ("+" | "-") Expr
 	> left Expr ("\<=" | "\>=" | "\<" | "\>") Expr
 	> left Expr ("==" | "!=") Expr
@@ -46,7 +46,8 @@ syntax Expr
 syntax Type
   = "boolean"
   | "integer"
-  | "string" ;  
+  | "string" 
+  ;  
   
 lexical Str 
 	=  "\"" [a-zA-Z][a-zA-Z0-9_\ ?:]* "\"" ;

@@ -3,6 +3,7 @@ module Check
 import AST;
 import Resolve;
 import Message; // see standard library
+import IO;
 
 data Type
   = tint()
@@ -18,22 +19,18 @@ Type ATypeConv(AType atype) {
 	switch(atype) {
 		case booleanType(): return tbool();
 		case integerType(): return tint();
-		case stringType(): return tstr();
-		default: return tunknown();
+		case stringType():  return tstr();
+		default: 						return tunknown();
 	}
 }
 
 // Function for better error handling
 str TypeConv(Type t) {
 	switch(t) {
-		case tbool(): 
-			return "boolean";
-		case tint(): 
-			return "integer";
-		case tstr(): 
-			return "string";
-		default: 
-			return "unknown type";
+		case tbool(): return "boolean";
+		case tint():  return "integer";
+		case tstr():  return "string";
+		default:  		return "unknown type";
 	}
 }
 
@@ -42,10 +39,10 @@ str TypeConv(Type t) {
 TEnv collect(AForm f) {
 	TEnv result = {};
 	for(/simp_quest(str name, AId ref, AType t) := f) {
-		result += { <ref.src, name, ref.name, ATypeConv(t)>} 	;
+		result += { <ref.src, name, ref.name, ATypeConv(t)>};
 	}
 	for(/computed_quest(str name, AId ref, AType t, AExpr _) := f) {
-		result += { <ref.src, name, ref.name, ATypeConv(t)>} 	;
+		result += { <ref.src, name, ref.name, ATypeConv(t)>};
 	}
 	return result;
 }
@@ -58,6 +55,7 @@ TEnv collect(AForm f) {
 	 * (ERROR) Reference to undeclared question
 	 * (ERROR) The guard of if(/else)-statement is not of type boolean
 	 * (WARNING) Different label for the same question
+	 * TODO: Check for cyclic reference
 */
 set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
 	set[Message] output = {};
@@ -181,41 +179,24 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       if (<u, loc d> <- useDef, <d, x, _, Type t> <- tenv) {
         return t;
       }
-		case boolean(bool _):
-			return tbool();
-		case integer(int _):
-			return tint();
-		case string(str _):
-			return tstr();
-		case un_min(AExpr _):
-			return tint();
-		case not(AExpr _):
-			return tbool();
-	  case mult(AExpr _, AExpr _):
-	  	return tint();
-	  case div(AExpr _, AExpr _):
-	  	return tint();
-	  case plus(AExpr _, AExpr _):
-	  	return tint();
-	  case min(AExpr _, AExpr _):
-	  	return tint();
-	  case leq(AExpr _, AExpr _):
-	  	return tbool();
-	  case geq(AExpr _, AExpr _):
-	  	return tbool();
-	  case lesser(AExpr _, AExpr _):
-	  	return tbool();
-	  case greater(AExpr _, AExpr _):
-	  	return tbool();
-	  case equals(AExpr _, AExpr _):
-	  	return tbool();
-	  case not_equals(AExpr _, AExpr _):
-	  	return tbool();
-	  case and(AExpr _, AExpr _):
-	  	return tbool();
-	  case or(AExpr _, AExpr _):
-	  	return tbool(); 
+		case boolean(bool _): return tbool();
+		case integer(int _):  return tint();
+		case string(str _):		return tstr();
+		case un_min(AExpr _): return tint();
+		case not(AExpr _):  	return tbool();
+	  case mult(AExpr _, AExpr _): return tint();
+	  case div(AExpr _, AExpr _):  return tint();
+	  case plus(AExpr _, AExpr _): return tint();
+	  case min(AExpr _, AExpr _):  return tint();
+	  case leq(AExpr _, AExpr _):  return tbool();
+	  case geq(AExpr _, AExpr _):  return tbool();
+	  case lesser(AExpr _, AExpr _):   	 return tbool();
+	  case greater(AExpr _, AExpr _):    return tbool();
+	  case equals(AExpr _, AExpr _):   	 return tbool();
+	  case not_equals(AExpr _, AExpr _): return tbool();
+	  case and(AExpr _, AExpr _):				 return tbool();
+	  case or(AExpr _, AExpr _):         return tbool(); 
+	  default:							return tunknown(); 
   }
-  return tunknown(); 
 }
 
